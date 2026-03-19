@@ -54,6 +54,6 @@ python3 run_glue_2a.py \
   --overwrite_output_dir \
   --world_size $WORLD_SIZE \
   --local_rank "$LOCAL_RANK" \
-  --server_ip $MASTER_IP \
-  --server_port $MASTER_PORT
+  --master_ip $MASTER_IP \
+  --master_port $MASTER_PORT
 

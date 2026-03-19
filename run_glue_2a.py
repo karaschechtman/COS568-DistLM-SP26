@@ -21,6 +21,7 @@ import argparse
 import glob
 import logging
 import os
+import time
 import random
 
 import numpy as np
@@ -47,6 +48,11 @@ from utils_glue import (compute_metrics, convert_examples_to_features,
                         output_modes, processors)
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(
+    format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
+    datefmt='%m/%d/%Y %H:%M:%S',
+    filename='training_2a.log' # Add this line to save logs to a file
+)
 
 ALL_MODELS = sum((tuple(conf.pretrained_config_archive_map.keys()) for conf in (BertConfig, XLNetConfig, XLMConfig, RobertaConfig)), ())
 
@@ -116,8 +122,10 @@ def train(args, train_dataset, model, tokenizer):
     set_seed(args)  # Added here for reproductibility (even between python 2 and 3)
     for _ in train_iterator:
         epoch_iterator = tqdm(train_dataloader, desc="Iteration", disable=args.local_rank not in [-1, 0])
+        total_time = 0.0
         for step, batch in enumerate(epoch_iterator):
             model.train()
+            tic = time.perf_counter()
             batch = tuple(t.to(args.device) for t in batch)
             inputs = {'input_ids':      batch[0],
                       'attention_mask': batch[1],
@@ -159,7 +167,10 @@ def train(args, train_dataset, model, tokenizer):
                 ##################################################
                 # TODO(cos568): perform a single optimization step (parameter update) by invoking the optimizer (expect one line of code)
                 optimizer.step()
-                
+                toc = time.perf_counter()
+                logger.info(f"Iteration {step}: {toc - tic:.6f} seconds")
+                if step != 0: # disregard first step
+                    total_time += (toc - tic)
                 ##################################################
                 scheduler.step() # Update learning rate schedule
                 model.zero_grad()
@@ -168,6 +179,9 @@ def train(args, train_dataset, model, tokenizer):
             if args.max_steps > 0 and global_step > args.max_steps:
                 epoch_iterator.close()
                 break
+        
+        logger.info(f"Average time per step (disregarding first step): {total_time / (global_step - 1):.6f} seconds")
+
         if args.max_steps > 0 and global_step > args.max_steps:
             train_iterator.close()
             break
@@ -235,13 +249,12 @@ def evaluate(args, model, tokenizer, prefix=""):
         result = compute_metrics(eval_task, preds, out_label_ids)
         results.update(result)
 
-        output_eval_file = os.path.join(eval_output_dir, "eval_results.txt")
+        output_eval_file = os.path.join(eval_output_dir, "eval_results_2a.txt")
         with open(output_eval_file, "w") as writer:
             logger.info("***** Eval results {} *****".format(prefix))
             for key in sorted(result.keys()):
                 logger.info("  %s = %s", key, str(result[key]))
                 writer.write("%s = %s\n" % (key, str(result[key])))
-
     return results
 
 
