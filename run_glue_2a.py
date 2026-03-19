@@ -161,8 +161,9 @@ def train(args, train_dataset, model, tokenizer):
                         torch.distributed.scatter(grad, scatter_list, src=0)
                 ##################################################
                 torch.nn.utils.clip_grad_norm_(model.parameters(), args.max_grad_norm)
-
-            tr_loss += loss.item()
+            step_loss = loss.item()
+            logger.info(f"Step {step}: loss = {step_loss:.4f}")
+            tr_loss += step_loss
             if (step + 1) % args.gradient_accumulation_steps == 0:
                 ##################################################
                 # TODO(cos568): perform a single optimization step (parameter update) by invoking the optimizer (expect one line of code)
