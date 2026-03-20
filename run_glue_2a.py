@@ -60,6 +60,12 @@ MODEL_CLASSES = {
 }
 
 
+# Setup logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(format = '%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
+                    datefmt = '%m/%d/%Y %H:%M:%S',
+                    level = logging.INFO)
+
 def set_seed(args):
     random.seed(args.seed)
     np.random.seed(args.seed)
@@ -413,12 +419,7 @@ def main():
               world_size=args.world_size, # Number of nodes (4 in our experiments)
               rank=args.local_rank, # 0, 1, 2, 3
           )
-
-    # Setup logging
-    logger = logging.getLogger(__name__)
-    logging.basicConfig(format = '%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
-                        datefmt = '%m/%d/%Y %H:%M:%S',
-                        level = logging.INFO if args.local_rank in [-1, 0] else logging.WARN)
+    
     logger.warning("Process rank: %s, device: %s, distributed training: %s, 16-bits training: %s",
                     args.local_rank, args.device, bool(args.local_rank != -1), args.fp16)
 
