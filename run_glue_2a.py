@@ -416,7 +416,7 @@ def main():
     if args.local_rank != -1:
       torch.distributed.init_process_group(
               backend='gloo', # for cpu
-              init_method=f"tcp://{args.master_addr}:{args.master_port}", # "tcp://{master_ip}:{master_port}"
+              init_method=f"tcp://{args.master_ip}:{args.master_port}", # "tcp://{master_ip}:{master_port}"
               world_size=args.world_size, # Number of nodes (4 in our experiments)
               rank=args.local_rank, # 0, 1, 2, 3
           )
