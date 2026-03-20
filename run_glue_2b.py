@@ -31,7 +31,6 @@ import torch.profiler
 from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler,
                               TensorDataset)
 from torch.utils.data.distributed import DistributedSampler
-
 from tqdm import tqdm, trange
 
 # import a previous version of the HuggingFace Transformers package
@@ -160,20 +159,13 @@ def train(args, train_dataset, model, tokenizer):
                     ##################################################
                     # TODO(cos568): perform backward pass here (expect one line of code)
                     loss.backward()
-                    # Gradient synchronization using gather/scatter (Task 2a)
+                    # Gradient synchronization using allreduce (task 2b)
                     if args.local_rank != -1:
                         grads = [param.grad.data for param in model.parameters() if param.requires_grad]
                         for grad in grads:
-                            # Gather gradients from all workers to rank 0
-                            grad_list = [torch.zeros_like(grad) for _ in range(args.world_size)] if args.local_rank == 0 else None
-                            torch.distributed.gather(grad, grad_list, dst=0)
-                            # On rank 0, average and scatter back
-                            if args.local_rank == 0:
-                                avg_grad = sum(grad_list) / args.world_size
-                                scatter_list = [avg_grad for _ in range(args.world_size)]
-                            else:
-                                scatter_list = None
-                            torch.distributed.scatter(grad, scatter_list, src=0)
+                            torch.distributed.all_reduce(grad, 
+                                                        op=torch.distributed.ReduceOp.SUM)
+                            grad /= args.world_size  # Average across all nodes
                     ##################################################
                     torch.nn.utils.clip_grad_norm_(model.parameters(), args.max_grad_norm)
                 step_loss = loss.item()
