@@ -49,13 +49,6 @@ from pytorch_transformers import AdamW, WarmupLinearSchedule
 from utils_glue import (compute_metrics, convert_examples_to_features,
                         output_modes, processors)
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-    format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
-    datefmt='%m/%d/%Y %H:%M:%S',
-    filename='training_2a.log' # Add this line to save logs to a file
-)
-
 ALL_MODELS = sum((tuple(conf.pretrained_config_archive_map.keys()) for conf in (BertConfig, XLNetConfig, XLMConfig, RobertaConfig)), ())
 
 MODEL_CLASSES = {
@@ -414,6 +407,7 @@ def main():
           )
 
     # Setup logging
+    logger = logging.getLogger(__name__)
     logging.basicConfig(format = '%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                         datefmt = '%m/%d/%Y %H:%M:%S',
                         level = logging.INFO if args.local_rank in [-1, 0] else logging.WARN)
