@@ -1,32 +1,32 @@
 #!/bin/bash
 
-pip install torch==2.5.0 torchvision==0.20.0 torchaudio==2.5.0 --index-url https://download.pytorch.org/whl/cpu
-pip install numpy scipy scikit-learn tqdm pytorch_transformers apex
-
-mkdir -p $HOME/glue_data
-python3 download_glue_data.py --data_dir $HOME/glue_data
-
 export GLUE_DIR=$HOME/glue_data
 export TASK_NAME=RTE
 
-# Please first use ifconfig to check the correct interface name and then use export GLOO_SOCKET_IFNAME=<exp if name>  to use that interface.
-# https://edstem.org/us/courses/94959/discussion/7800541
-export GLOO_SOCKET_IFNAME=enp5s0f0   # Replace with your interface
-
-# Distributed training arguments
-export MASTER_IP=10.10.1.1      # Add master node IP
-export MASTER_PORT=12345        # Choose any unused port >1023
-export WORLD_SIZE=4             # Number of nodes
-
-# Set the local rank from the command-line argument (default to 0 if not provided)
 LOCAL_RANK=0
+SOCKET_NAME=""
+MASTER_IP=""
 # Parse command-line arguments
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --local_rank) LOCAL_RANK="$2"; shift ;;
+        --socket_name) SOCKET_NAME="$2"; shift ;;
+        --master_ip) MASTER_IP="$2"; shift ;;
     esac
     shift
 done
+
+
+# Use ifconfig to check the correct interface name and then use --socket_name  to use that interface.
+# https://edstem.org/us/courses/94959/discussion/7800541
+export GLOO_SOCKET_IFNAME="$SOCKET_NAME"   # Set from command line
+
+# Distributed training arguments - also use ifconfig to get name
+export MASTER_IP="$MASTER_IP"      # Set from command line
+export MASTER_PORT=12345        # Choose any unused port >1023
+export WORLD_SIZE=4             # Number of nodes
+
+
 
 # Run distributed training (Task 2a)
 python3 run_glue_2a.py \
