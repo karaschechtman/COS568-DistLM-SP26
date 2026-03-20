@@ -389,6 +389,12 @@ def main():
                              "See details at https://nvidia.github.io/apex/amp.html")
     parser.add_argument("--local_rank", type=int, default=-1,
                         help="For distributed training: local_rank. If single-node training, local_rank defaults to -1.")
+
+    # Parameters for distributed training network setup
+    parser.add_argument("--world_size", type=int, default=1, help="Number of nodes for distributed training.")
+    parser.add_argument("--master_ip", type=str, default="127.0.0.1", help="Master node IP address.")
+    parser.add_argument("--master_port", type=int, default=12345, help="Master node port.")
+
     args = parser.parse_args()
 
     if os.path.exists(args.output_dir) and os.listdir(args.output_dir) and args.do_train and not args.overwrite_output_dir:
