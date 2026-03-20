@@ -37,7 +37,7 @@ python3 run_glue_2a.py \
   --do_eval \
   --data_dir $GLUE_DIR/$TASK_NAME \
   --max_seq_length 128 \
-  --per_device_train_batch_size 64 \
+  --per_device_train_batch_size 16 \
   --learning_rate 2e-5 \
   --num_train_epochs 1\
   --output_dir ./tmp/$TASK_NAME \
