@@ -3,8 +3,6 @@
 pip install torch==2.5.0 torchvision==0.20.0 torchaudio==2.5.0 --index-url https://download.pytorch.org/whl/cpu
 pip install numpy scipy scikit-learn tqdm pytorch_transformers apex
 
-cd $HOME
-git clone https://github.com/karaschechtman/COS568-DistLM-SP26.git
 cd COS568-DistLM-SP26
 
 mkdir -p $HOME/glue_data
