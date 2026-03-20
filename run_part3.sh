@@ -26,10 +26,8 @@ export MASTER_IP="$MASTER_IP"      # Set from command line
 export MASTER_PORT=12345        # Choose any unused port >1023
 export WORLD_SIZE=4             # Number of nodes
 
-
-
-# Run distributed training (Task 2b)
-python3 run_glue_2b.py \
+# Run distributed training (task 3)
+python3 run_glue_3.py \
   --model_type bert \
   --model_name_or_path bert-base-cased \
   --task_name $TASK_NAME \
